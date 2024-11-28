@@ -1,0 +1,610 @@
+
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System</title>
+    <style>
+ :root {
+        --bg-color-light: #ffffff; /* White background */
+        --text-color-light: #000000; /* Black text */
+        --btn-color: #800000; /* Maroon */
+        --feedback-success: #4CAF50;
+        --feedback-error: #f44336;
+    }
+
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--bg-color-light);
+        color: var(--text-color-light);
+        margin: 0;
+        padding: 20px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--btn-color);
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: var(--btn-color);
+        color: white;
+        font-weight: normal;
+    }
+
+    .form-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        background-color: #ffffff;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        width: 50%;
+        max-width: 90%;
+        max-height: 80%;
+        overflow: auto;
+    }
+
+    .form-container {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-popup h2 {
+        margin-top: 0;
+        color: var(--btn-color);
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .form-container input, .form-container select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .form-container button {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--btn-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 10px;
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+    .feedback {
+        margin-top: 10px;
+        padding: 10px;
+        color: white;
+        display: none;
+        border-radius: 5px;
+    }
+
+    .feedback.success {
+        background-color: var(--feedback-success);
+    }
+
+    .feedback.error {
+        background-color: var(--feedback-error);
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .button-container button {
+        background-color: var(--btn-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--btn-color);
+    }
+    .image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.image-container img {
+    max-width: 100px;
+    height: auto;
+    border-radius: 5px;
+}
+
+
+    @media (max-width: 600px) {
+        body {
+            padding: 10px;
+        }
+
+        .container {
+            padding: 10px;
+        }
+
+        .form-container input, .form-container select, .form-container button {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .button-container {
+            flex-direction: column;
+        }
+
+        .button-container button {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .close {
+            font-size: 18px;
+        }
+
+        .form-popup {
+            width: calc(100% - 20px);
+            height: auto;
+            padding: 15px;
+            top: auto;
+            bottom: 0;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .form-popup h2 {
+            font-size: 1.2em;
+        }
+
+        .form-container {
+            padding: 10px;
+        }
+    }
+    </style>
+</head>
+<body>
+<div class="container" id="mainPage">
+    <h1>Library System</h1>
+
+    <!-- Buttons Section -->
+    <div class="button-container">
+        <button id="manageBooksButton" onclick="handleButtonClick(openAdminLoginForm)">Add Book (Admin)</button>
+        <button id="borrowButton" onclick="handleButtonClick(openBorrowForm)">Borrow Book</button>
+        <button id="returnButton" onclick="handleButtonClick(openReturnForm)">Return Book</button>
+    </div>
+
+<!-- Feedback Message Section -->
+<div id="feedbackMain" class="feedback"></div>
+<!-- Add this line below the existing feedbackMain -->
+<div id="returnFeedbackMain" class="feedback"></div> 
+<div id="borrowFeedbackMain" class="feedback"></div>
+
+
+
+
+    <!-- Book List Section -->
+    <table id="bookList">
+        <thead>
+        <tr>
+           <th>Book Image</th>
+            <th>Book Name</th>
+            <th>Author</th>
+            <th>Availability</th>
+            <th>Borrower</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Book entries will go here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Admin Login Form -->
+<div class="form-popup" id="adminLoginForm">
+    <div class="form-container">
+        <span class="close" onclick="closeForm('adminLoginForm')">&times;</span>
+        <h2>Admin Login</h2>
+        <input type="text" id="adminUsername" placeholder="Username">
+        <input type="password" id="adminPassword" placeholder="Password">
+        <button onclick="adminLogin()">Login</button>
+        <div id="adminLoginFeedback" class="feedback"></div>
+    </div>
+</div>
+
+<!-- Add Book Pop-up -->
+<div class="form-popup" id="addBookForm">
+    <span class="close" onclick="closeForm('addBookForm')">&times;</span>
+    <div class="form-container">
+        <h2>Add Book</h2>
+        <input type="text" id="bookName" placeholder="Book Name">
+        <input type="text" id="authorName" placeholder="Author Name">
+        <input type="text" id="bookImage" placeholder="Image URL"> <!-- Added this line -->
+        <button onclick="addBook()">Add Book</button>
+        <div id="addBookFeedback" class="feedback"></div>
+    </div>
+</div>
+
+
+<!-- Borrow Form -->
+<div class="form-popup" id="borrowForm">
+    <span class="close" onclick="closeForm('borrowForm')">&times;</span>
+    <div class="form-container">
+        <h2>Borrow Book</h2>
+        <div id="borrowBookImageContainer" class="image-container"></div> <!-- Added this line -->
+        <select id="borrowBookIndex" onchange="updateBorrowBookImage()"></select>
+        <input type="text" id="borrowerName" placeholder="Borrower Name">
+        <input type="text" id="borrowerID" placeholder="4-character ID e.g. PUP1" maxlength="4">
+        <button onclick="borrowBook()">Borrow Book</button>
+        <div id="borrowFeedback" class="feedback"></div>
+    </div>
+</div>
+
+
+
+<!-- Return Form -->
+<div class="form-popup" id="returnForm">
+    <span class="close" onclick="closeForm('returnForm')">&times;</span>
+    <div class="form-container">
+        <h2>Return Book</h2>
+        <div id="returnBookImageContainer" class="image-container"></div> <!-- Added this line -->
+        <select id="returnBookIndex" onchange="updateReturnBookImage()"></select> <!-- Added onchange event -->
+        <input type="text" id="returnBorrowerName" placeholder="Borrower Name">
+        <input type="text" id="returnBorrowerID" placeholder="Borrower ID" maxlength="4">
+        <button onclick="returnBook()">Return Book</button>
+        <div id="returnFeedback" class="feedback"></div>
+    </div>
+</div>
+
+
+
+<!-- Success Popup Message -->
+<div class="form-popup" id="popupMessage">
+    <div class="form-container">
+        <h2>Action Successful</h2>
+        <p id="popupMessageContent">Operation completed successfully.</p>
+    </div>
+</div>
+
+<script>
+    let books = [
+    { name: "Lolita", author: "Vladimir Nabokov", availability: "Available", borrowedBy: "", borrowerID: "", image: "https://s26162.pcdn.co/wp-content/uploads/2018/08/1990-F-Gallimard-folio-Paris.jpg" },
+    { name: "The Catcher in the Rye", author: "J. D. Salinger", availability: "Available", borrowedBy: "", borrowerID: "", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxPsvkLCwzu2uk9d3sZI3fyjtyDZoHrj_rRg&s" },
+    { name: "1984", author: "George Orwell", availability: "Available", borrowedBy: "", borrowerID: "", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyxBJ_RsLw7TaMV-_aEsagT4kttBKc-BEwWQ&s" }
+];
+
+
+    let isPopupOpen = false; // Track if any popup is open
+
+    function handleButtonClick(callback) {
+        if (!isPopupOpen) {
+            callback();
+        }
+    }
+
+    function openAdminLoginForm() {
+        openForm('adminLoginForm');
+    }
+
+  function openBorrowForm() {
+    const availableBooks = books.some(book => book.availability === "Available");
+    if (availableBooks) {
+        populateDropdown('borrowBookIndex', 'Available');
+        updateBorrowBookImage(); // Add this line
+        openForm('borrowForm');
+    } else {
+        displayFeedback('feedbackMain', 'error', 'All books are currently borrowed');
+    }
+}
+
+function updateBorrowFormImage() {
+    const bookIndex = document.getElementById('borrowBookIndex').value;
+    const bookImage = books[bookIndex].image;
+    document.getElementById('borrowBookImage').src = bookImage;
+}
+
+
+   function openReturnForm() {
+    // Check if there are borrowed books
+    const borrowedBooks = books.some(book => book.availability === "Borrowed");
+    if (borrowedBooks) {
+        populateDropdown('returnBookIndex', 'Borrowed');
+        updateReturnBookImage(); // Add this line
+        openForm('returnForm');
+    } else {
+        displayFeedback('returnFeedbackMain', 'error', 'There are no borrowed books to return.');
+    }
+}
+
+
+    function openForm(formId) {
+        document.getElementById(formId).style.display = 'block';
+        isPopupOpen = true;
+        disableMainButtons();
+    }
+
+    function closeForm(formId) {
+        document.getElementById(formId).style.display = 'none';
+        isPopupOpen = false;
+        enableMainButtons();
+        clearInputFields(formId);
+    }
+
+    function disableMainButtons() {
+        document.getElementById('manageBooksButton').disabled = true;
+        document.getElementById('borrowButton').disabled = true;
+        document.getElementById('returnButton').disabled = true;
+    }
+
+    function enableMainButtons() {
+        document.getElementById('manageBooksButton').disabled = false;
+        document.getElementById('borrowButton').disabled = false;
+        document.getElementById('returnButton').disabled = false;
+    }
+
+    function clearInputFields(formId) {
+        const inputs = document.getElementById(formId).querySelectorAll('input');
+        inputs.forEach(input => {
+            input.value = '';
+        });
+    }
+    function clearAllFeedback() {
+        const feedbackElements = document.querySelectorAll('.feedback');
+        feedbackElements.forEach(feedbackElement => {
+            feedbackElement.style.display = 'none';
+            feedbackElement.textContent = '';
+        });
+    }
+    function displayFeedback(elementId, type, message, duration = 3000) {
+        const feedbackElement = document.getElementById(elementId);
+        feedbackElement.textContent = message;
+        feedbackElement.className = `feedback ${type}`;
+        feedbackElement.style.display = 'block';
+
+        // Hide the feedback message after specified duration
+        setTimeout(() => {
+            feedbackElement.style.display = 'none';
+            // Clear input fields upon error message disappearing
+            if (type === 'error') {
+                const formId = getFormIdFromElementId(elementId); // Assuming a function to get formId from elementId
+                clearInputFields(formId);
+            }
+        }, duration);
+    }
+
+    // Example function to get formId from elementId
+    function getFormIdFromElementId(elementId) {
+        // Implement logic to extract formId from elementId if needed
+        return elementId.replace('Feedback', 'Form');
+    }
+
+    function adminLogin() {
+        const username = document.getElementById("adminUsername").value;
+        const password = document.getElementById("adminPassword").value;
+
+        if (username === "admin" && password === "admin123") {
+            closeForm("adminLoginForm");
+            openForm("addBookForm");
+        } else {
+            displayFeedback('adminLoginFeedback', 'error', 'Invalid username or password');
+        }
+    }
+
+   function addBook() {
+        const bookName = document.getElementById("bookName").value;
+        const authorName = document.getElementById("authorName").value;
+        const bookImage = document.getElementById("bookImage").value; // Add this line
+
+        if (bookName === "" || authorName === "") {
+            displayFeedback('addBookFeedback', 'error', 'Please fill in all fields');
+            return;
+        }
+
+        // Function to capitalize first letter of each word in a string
+        function capitalizeFirstLetters(str) {
+            return str.toLowerCase().replace(/^\w|\s\w/g, function (letter) {
+                return letter.toUpperCase();
+            });
+        }
+
+        // Check if the book already exists
+        const existingBook = books.find(book => {
+            return book.name.toLowerCase() === bookName.toLowerCase() && book.author.toLowerCase() === authorName.toLowerCase();
+        });
+
+        if (existingBook) {
+            displayFeedback('addBookFeedback', 'error', 'Book already exists in the system');
+            return;
+        } else {
+            displayFeedback('feedbackMain', 'success', 'Book added successfully');
+        }
+
+        // Add the book to the list
+        books.push({ name: bookName, author: capitalizeFirstLetters(authorName), availability: "Available", borrowedBy: "", borrowerID: "", image: bookImage });
+        closeForm('addBookForm');
+        renderBookList();
+    }
+
+
+function borrowBook() {
+    const bookIndex = document.getElementById("borrowBookIndex").value;
+    let borrowerName = document.getElementById("borrowerName").value.toLowerCase();
+    let borrowerID = document.getElementById("borrowerID").value.trim(); // Use trim() to remove leading/trailing spaces
+
+    if (borrowerName === "" || borrowerID.length !== 4 || !/^\w+$/.test(borrowerID)) {
+        displayFeedback('borrowFeedback', 'error', 'Please enter a valid borrower name and a 4-character ID.');
+        return;
+    }
+
+    // Update book details
+    books[bookIndex].availability = "Borrowed";
+    books[bookIndex].borrowedBy = borrowerName;
+    books[bookIndex].borrowerID = borrowerID.toUpperCase(); // Convert ID to uppercase
+
+    // Display success feedback outside of the pop-up form
+    displayFeedback('borrowFeedbackMain', 'success', 'Book borrowed successfully');
+
+    closeForm('borrowForm');
+    renderBookList();
+
+    // Check if all books are borrowed to show appropriate feedback
+    if (books.every(book => book.availability === "Borrowed")) {
+        displayFeedback('feedbackMain', 'success', 'All books are currently borrowed');
+    }
+}
+
+function updateBorrowBookImage() {
+    const bookIndex = document.getElementById("borrowBookIndex").value;
+    const imageContainer = document.getElementById("borrowBookImageContainer");
+
+    if (bookIndex !== "") {
+        const selectedBook = books[bookIndex];
+        const bookImage = selectedBook.image || 'https://linktoimage.com/default.jpg';
+
+        imageContainer.innerHTML = `<img src="${bookImage}" alt="Book Image">`;
+    } else {
+        imageContainer.innerHTML = "";
+    }
+}
+
+
+function returnBook() {
+    const bookIndex = document.getElementById("returnBookIndex").value;
+    let borrowerName = document.getElementById("returnBorrowerName").value.toLowerCase();
+    let borrowerID = document.getElementById("returnBorrowerID").value.trim(); // Use trim() to remove leading/trailing spaces
+
+    if (borrowerName === "" || borrowerID.length !== 4 || !/^\w+$/.test(borrowerID)) {
+        displayFeedback('returnFeedback', 'error', 'Please enter a valid borrower name and a 4-character ID.');
+        return;
+    }
+
+    if (books[bookIndex].availability !== "Borrowed" || books[bookIndex].borrowedBy.toLowerCase() !== borrowerName || books[bookIndex].borrowerID !== borrowerID.toUpperCase()) {
+        displayFeedback('returnFeedback', 'error', 'Book cannot be returned. Please check borrower information.');
+        return;
+    }
+
+    books[bookIndex].availability = "Available";
+    books[bookIndex].borrowedBy = "";
+    books[bookIndex].borrowerID = "";
+
+    closeForm('returnForm');
+    renderBookList();
+    displayFeedback('returnFeedbackMain', 'success', 'Book returned successfully');
+
+    // Check if all books are available to show appropriate feedback
+    if (books.every(book => book.availability === "Available")) {
+        displayAllAvailableFeedback();
+    }
+}
+// Update this function to include the image container for the return form
+function updateReturnBookImage() {
+    const bookIndex = document.getElementById("returnBookIndex").value;
+    const imageContainer = document.getElementById("returnBookImageContainer");
+
+    if (bookIndex !== "") {
+        const selectedBook = books[bookIndex];
+        const bookImage = selectedBook.image || 'https://linktoimage.com/default.jpg';
+
+        imageContainer.innerHTML = `<img src="${bookImage}" alt="Book Image">`;
+    } else {
+        imageContainer.innerHTML = "";
+    }
+}
+    function renderBookList() {
+    const bookList = document.getElementById("bookList").getElementsByTagName("tbody")[0];
+    bookList.innerHTML = "";
+    books.forEach(book => {
+        const row = bookList.insertRow();
+        const imageCell = row.insertCell(0); // Add this line
+        const imageElement = document.createElement('img'); // Add this line
+        imageElement.src = book.image || 'https://linktoimage.com/default.jpg'; // Use a default image if none is provided
+        imageElement.style.width = '50px'; // Set the desired width for the image
+        imageElement.style.height = 'auto'; // Maintain aspect ratio
+        imageCell.appendChild(imageElement); // Add this line
+        row.insertCell(1).textContent = book.name; // Update index from 0 to 1
+        row.insertCell(2).textContent = book.author; // Update index from 1 to 2
+        row.insertCell(3).textContent = book.availability; // Update index from 2 to 3
+        row.insertCell(4).textContent = formatBorrowerName(book.borrowedBy); // Update index from 3 to 4
+    });
+}
+
+
+    function formatBorrowerName(name) {
+        if (!name) return '-';
+        // Capitalize first letter and convert rest to lowercase
+        return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    }
+
+    function populateDropdown(dropdownId, status) {
+        const dropdown = document.getElementById(dropdownId);
+        dropdown.innerHTML = "";
+        books.forEach((book, index) => {
+            if (book.availability === status) {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = `${book.name} by ${book.author}`;
+                dropdown.appendChild(option);
+            }
+        });
+    }
+
+    // Initial rendering of the book list
+    renderBookList();
+
+</script>
+
+</body>
+</html>
